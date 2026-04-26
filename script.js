@@ -40,15 +40,74 @@ function getRandomItem(list) {
   return list[Math.floor(Math.random() * list.length)];
 }
 
+const CHANNEL_TOP_VIDEOS = {
+  "icooklean": {
+    displayName: "Icooklean",
+    url: "https://www.youtube.com/watch?v=aRn4w5Ev2ic"
+  },
+  "ladleandlovebyridhima": {
+    displayName: "Ladle and Love by Ridhima",
+    url: "https://www.youtube.com/watch?v=dMrPeSj9FFo"
+  },
+  "ladle and love by ridhima": {
+    displayName: "Ladle and Love by Ridhima",
+    url: "https://www.youtube.com/watch?v=dMrPeSj9FFo"
+  },
+  "kaustubhlifestyle": {
+    displayName: "kaustubhlifestyle",
+    url: "https://www.youtube.com/watch?v=WY1OcmD0qCU"
+  },
+  "wethinkfusion": {
+    displayName: "WE THINK FUSION",
+    url: "https://www.youtube.com/watch?v=sA0GlXxGKek"
+  }
+};
+
+function getYouTubeId(url) {
+  const match = url.match(/(?:v=|\/youtu\.be\/|\/embed\/)([^&?/]+)/);
+  return match ? match[1] : null;
+}
+
 function showRandomBreakfast() {
   const random = getRandomItem(breakfasts);
   document.getElementById('rbName').textContent = random.name;
   document.getElementById('rbTime').textContent = random.time;
   document.getElementById('rbIngredients').textContent = random.ingredients;
   document.getElementById('rbPrep').textContent = random.prep;
-  const videoId = random.video.split('v=')[1];
+  const videoId = getYouTubeId(random.video);
   document.getElementById('rbVideo').src = `https://www.youtube.com/embed/${videoId}`;
   document.getElementById('randomBreakfast').style.display = 'block';
+}
+
+function showRandomChannelVideo() {
+  const raw = document.getElementById('channelNamesInput').value;
+  const channels = raw.split(',').map(c => c.trim()).filter(Boolean);
+  if (!channels.length) {
+    alert('Enter one or more channel names separated by commas.');
+    return;
+  }
+
+  const normalized = channels.map(ch => ch.toLowerCase().replace(/\s+/g, ' ').trim());
+  const matched = normalized.filter(ch => CHANNEL_TOP_VIDEOS[ch]);
+  if (!matched.length) {
+    const supported = Object.values(CHANNEL_TOP_VIDEOS).map(c => c.displayName).join(', ');
+    alert(`No top videos found for those channels. Supported channel names: ${supported}`);
+    return;
+  }
+
+  const chosenKey = getRandomItem(matched);
+  const config = CHANNEL_TOP_VIDEOS[chosenKey];
+  const videoId = getYouTubeId(config.url);
+  if (!videoId) {
+    alert('Invalid video URL configured for channel: ' + config.displayName);
+    return;
+  }
+
+  document.getElementById('rcvName').textContent = `Top video from ${config.displayName}`;
+  document.getElementById('rcvChannel').textContent = config.url;
+  document.getElementById('rcvVideo').src = `https://www.youtube.com/embed/${videoId}`;
+  document.getElementById('rcvNotice').textContent = 'This selection is based on stored top videos for the channels you enter.';
+  document.getElementById('randomChannelVideo').style.display = 'block';
 }
 
 let isOnBreak = false;
