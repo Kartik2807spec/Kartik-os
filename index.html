@@ -864,3 +864,16 @@ setInterval(renderReminders, 60 * 1000);
 
 </body>
 </html>
+=======
+  if(sb){sb.style.width=Math.min(STATE.steps/10000*100,100)+'%';sb.className='status-fill '+(STATE.steps>=10000?'ok':STATE.steps>=7000?'warn':'over');}
+}
+
+renderAll();
+initNotifications();
+checkTimedBanners();
+setInterval(checkTimedBanners,5*60*1000);
+setInterval(renderReminders,60*1000);
+</script>
+</body>
+</html>
+>>>>>>> 3af456e55bc959f8e098764adf0a31847a1b7ca6
