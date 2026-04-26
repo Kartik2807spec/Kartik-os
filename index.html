@@ -422,7 +422,7 @@ select:focus,input:focus{outline:none;border-color:var(--gold);}
       <div class="meal-day">Bonus · Weekend Swap</div>
       <div class="meal-name">Yogabar Oats + Banana 🍌</div>
       <div class="meal-tags"><span class="badge badge-gold">Your choice</span><span class="badge badge-green">5 mins</span><span class="badge badge-orange">Use sparingly</span></div>
-      <div style="font-size:.78rem;color:var(--muted);line-height:1.7">Plain Yogabar oats + 1 banana + cinnamon + chia. Skip honey on strict days.</div>
+      <div style="font-size:.78rem;color:var(--muted);line-height:1.7">Plain Yogabar oats + 1 banana + cinnamon. Skip honey on strict days.</div>
       <div class="alert alert-warn" style="margin-top:10px;padding:8px 10px;font-size:.72rem;"><span>⚠️</span><span>Use plain oats variant only. Flavoured = added sugar.</span></div>
     </div>
   </div>
@@ -620,7 +620,6 @@ function save(){
 }
 
 function goPage(id,btn){
-  console.log('Switching to', id);
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
@@ -830,9 +829,7 @@ function checkTimedBanners(){
   if(h===22&&m<5) showBanner('✨ 10 PM — PM Skincare time! CeraVe → Moisturiser.','✨');
 }
 
-<script>
 function renderAll(){
-  console.log('Rendering all');
   renderHero();renderReminders();renderMoneyBlocks();
   document.getElementById('dashAppCaps').innerHTML='';
   renderDashAppCaps();renderAppCaps('appCapsList');renderTxnList();renderEF();
@@ -857,12 +854,6 @@ checkTimedBanners();
 setInterval(checkTimedBanners, 5 * 60 * 1000);
 setInterval(renderReminders, 60 * 1000);
 </script>
-
-<!-- BREAK SYSTEM UI -->
-<div id="break-container" style="margin-top:20px; text-align:center;">
-  <button onclick="startBreak()" class="app-card">Take a Break</button>
-  <p id="break-status" style="margin-top:10px;"></p>
-</div>
 
 </body>
 </html>
