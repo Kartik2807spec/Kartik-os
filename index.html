@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<title>Kartik's Daily OS</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080809;
+  --s1: #101012;
+  --s2: #18181c;
+  --border: #1e1e24;
+  --border2: #2a2a32;
+  --text: #f0ede8;
+  --muted: #5a5a6e;
+  --dim: #2a2a32;
+  --gold: #c9a84c;
+  --gold2: #e8c878;
+  --gold-dim: rgba(201,168,76,.12);
+  --green: #4caf7d;
+  --red: #e05c5c;
+  --orange: #e07d3c;
+  --blue: #4c8ce0;
+  --purple: #9c6ce0;
+  --teal: #4cc0c0;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+
+body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.025'/%3E%3C/svg%3E");pointer-events:none;z-index:999;opacity:.5;}
+
+nav{position:fixed;top:0;left:0;right:0;z-index:200;background:rgba(8,8,9,.96);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:56px;display:flex;align-items:center;padding:0 16px;gap:0;}
+.nav-brand{font-family:'Bebas Neue',sans-serif;font-size:1.5rem;letter-spacing:.12em;color:var(--gold);margin-right:20px;white-space:nowrap;flex-shrink:0;}
+.nav-tabs{display:flex;gap:4px;overflow-x:auto;flex:1;padding:4px 0;scrollbar-width:none;}
+.nav-tabs::-webkit-scrollbar{display:none;}
+.ntab{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:60px;padding:5px 10px;font-size:.6rem;font-family:'DM Mono',monospace;font-weight:500;color:var(--muted);background:transparent;border:1px solid transparent;cursor:pointer;border-radius:10px;white-space:nowrap;transition:all .2s;letter-spacing:.04em;text-transform:uppercase;}
+.ntab-icon{font-size:1.1rem;line-height:1;}
+.ntab.active{background:var(--gold);color:#000;border-color:var(--gold);}
+.ntab:hover:not(.active){color:var(--text);background:var(--s2);border-color:var(--border2);}
+
+#notifBanner{display:none;position:fixed;top:56px;left:0;right:0;z-index:190;background:linear-gradient(135deg,rgba(201,168,76,.18),rgba(201,168,76,.08));border-bottom:1px solid rgba(201,168,76,.3);backdrop-filter:blur(10px);padding:10px 16px;font-size:.82rem;color:var(--gold);font-weight:500;cursor:pointer;animation:slideDown .3s ease;}
+#notifBanner .notif-inner{display:flex;align-items:center;gap:10px;max-width:700px;margin:0 auto;}
+#notifBanner .notif-close{margin-left:auto;opacity:.6;font-size:.9rem;}
+@keyframes slideDown{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+
+main{padding-top:56px;}
+.page{display:none;animation:fadeIn .25s ease;}
+.page.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+.hero{padding:24px 20px 20px;border-bottom:1px solid var(--border);background:linear-gradient(180deg,rgba(201,168,76,.04) 0%,transparent 100%);}
+.hero-date{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-bottom:4px;}
+.hero-title{font-family:'Bebas Neue',sans-serif;font-size:3.2rem;letter-spacing:.04em;line-height:1;color:var(--text);}
+.hero-title span{color:var(--gold);}
+.hero-sub{font-size:.8rem;color:var(--muted);margin-top:6px;}
+
+.reminder-strip{background:rgba(201,168,76,.06);border-bottom:1px solid rgba(201,168,76,.15);padding:10px 20px;display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;}
+.reminder-strip:empty{display:none;}
+.reminder-strip::-webkit-scrollbar{display:none;}
+.rem-chip{display:flex;align-items:center;gap:8px;background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.25);border-radius:20px;padding:6px 12px;white-space:nowrap;font-size:.75rem;font-weight:500;color:var(--gold);flex-shrink:0;}
+.rem-chip.blue{background:rgba(76,140,224,.1);border-color:rgba(76,140,224,.25);color:var(--blue);}
+.rem-chip.green{background:rgba(76,175,125,.1);border-color:rgba(76,175,125,.25);color:var(--green);}
+
+.money-row{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);}
+@media(max-width:700px){.money-row{grid-template-columns:repeat(2,1fr);}}
+.money-cell{background:var(--bg);padding:14px 16px;}
+.mc-label{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+.mc-val{font-family:'Bebas Neue',sans-serif;font-size:1.9rem;letter-spacing:.04em;line-height:1;}
+.mc-sub{font-size:.68rem;color:var(--muted);margin-top:3px;}
+
+.fixed-bar{padding:12px 20px;border-bottom:1px solid var(--border);background:rgba(224,92,92,.04);}
+.fixed-bar-inner{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.fixed-label{font-family:'DM Mono',monospace;font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-right:4px;}
+.fixed-chip{background:rgba(224,92,92,.12);border:1px solid rgba(224,92,92,.2);border-radius:6px;padding:4px 10px;font-size:.72rem;font-family:'DM Mono',monospace;color:var(--red);}
+.fixed-chip span{color:rgba(240,237,232,.5);font-size:.65rem;margin-left:4px;}
+.fixed-total{margin-left:auto;font-family:'Bebas Neue',sans-serif;font-size:1rem;color:var(--red);}
+
+.grid{display:grid;gap:1px;background:var(--border);}
+.grid-2{grid-template-columns:1fr 1fr;}
+.grid-3{grid-template-columns:1fr 1fr 1fr;}
+@media(max-width:600px){.grid-2,.grid-3{grid-template-columns:1fr 1fr;}}
+@media(max-width:400px){.grid-3{grid-template-columns:1fr;}}
+.block{background:var(--bg);padding:18px 20px;position:relative;}
+.block-label{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.block-label::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--gold);}
+.block-value{font-family:'Bebas Neue',sans-serif;font-size:2.2rem;letter-spacing:.04em;line-height:1;}
+.block-sub{font-size:.72rem;color:var(--muted);margin-top:4px;}
+
+.status-bar{height:3px;background:var(--dim);border-radius:2px;overflow:hidden;margin-top:10px;}
+.status-fill{height:100%;border-radius:2px;transition:width .8s cubic-bezier(.4,0,.2,1);}
+.ok{background:var(--green);}
+.warn{background:var(--orange);}
+.over{background:var(--red);}
+
+.app-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:8px;transition:border-color .2s;}
+.app-card:hover{border-color:var(--border2);}
+.app-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.app-name{font-size:.88rem;font-weight:600;}
+.app-spent{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;}
+.app-cap-label{font-size:.65rem;color:var(--muted);text-align:right;}
+
+.exp-form{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
+.exp-row{display:grid;grid-template-columns:1fr 1fr 100px;gap:8px;margin-bottom:8px;}
+@media(max-width:500px){.exp-row{grid-template-columns:1fr 1fr;} .exp-row input[type=number]{grid-column:1/-1;}}
+select,input[type=text],input[type=number]{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.82rem;width:100%;transition:border-color .2s;}
+select:focus,input:focus{outline:none;border-color:var(--gold);}
+.btn{background:var(--gold);color:#000;border:none;border-radius:8px;padding:9px 18px;font-family:'DM Mono',monospace;font-size:.72rem;font-weight:500;cursor:pointer;letter-spacing:.05em;transition:all .2s;}
+.btn:hover{background:var(--gold2);}
+.btn:active{transform:scale(.96);}
+.btn-sm{padding:6px 12px;font-size:.65rem;}
+.btn-ghost{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold);background:transparent;}
+
+.sec-hd{padding:20px 20px 14px;border-bottom:1px solid var(--border);}
+.sec-hd h2{font-family:'Bebas Neue',sans-serif;font-size:1.7rem;letter-spacing:.06em;}
+.sec-hd p{font-size:.78rem;color:var(--muted);margin-top:2px;}
+
+.inner-tabs{display:flex;gap:4px;padding:12px 20px 0;border-bottom:1px solid var(--border);}
+.itab{padding:7px 14px;font-size:.7rem;font-family:'DM Mono',monospace;color:var(--muted);background:transparent;border:none;cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;letter-spacing:.05em;}
+.itab.active{color:var(--gold);border-bottom-color:var(--gold);}
+
+.padded{padding:18px 20px;}
+
+.badge{display:inline-block;font-size:.62rem;font-family:'DM Mono',monospace;padding:2px 7px;border-radius:20px;letter-spacing:.04em;font-weight:500;}
+.badge-gold{background:rgba(201,168,76,.15);color:var(--gold);}
+.badge-green{background:rgba(76,175,125,.15);color:var(--green);}
+.badge-red{background:rgba(224,92,92,.15);color:var(--red);}
+.badge-orange{background:rgba(224,125,60,.15);color:var(--orange);}
+.badge-blue{background:rgba(76,140,224,.15);color:var(--blue);}
+.badge-purple{background:rgba(156,108,224,.15);color:var(--purple);}
+
+.meal-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;position:relative;overflow:hidden;}
+.meal-card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--gold);}
+.meal-day{font-family:'DM Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:5px;}
+.meal-name{font-size:.98rem;font-weight:600;margin-bottom:6px;}
+.meal-tags{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px;}
+.meal-reminder{background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.18);border-radius:8px;padding:8px 10px;font-size:.7rem;color:var(--gold);margin-top:8px;}
+
+.workout-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;}
+.workout-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.workout-day{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;letter-spacing:.06em;}
+.exercise-list{display:flex;flex-direction:column;gap:0;}
+.exercise-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);}
+.exercise-row:last-child{border-bottom:none;}
+.exercise-name{font-size:.82rem;}
+.exercise-detail{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted);}
+
+.routine-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px;}
+.routine-step{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border);}
+.routine-step:last-child{border-bottom:none;}
+.step-num{width:26px;height:26px;border-radius:50%;background:var(--dim);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.68rem;color:var(--gold);flex-shrink:0;}
+.step-name{font-size:.88rem;font-weight:500;margin-bottom:2px;}
+.step-note{font-size:.73rem;color:var(--muted);line-height:1.6;}
+.step-product{font-size:.68rem;font-family:'DM Mono',monospace;color:var(--gold);margin-top:3px;}
+
+.recipe-box{background:var(--s2);border-radius:10px;padding:14px;margin-top:10px;}
+.recipe-title{font-family:'DM Mono',monospace;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.recipe-step{font-size:.78rem;color:var(--text);padding:3px 0;display:flex;gap:8px;line-height:1.6;}
+.recipe-step::before{content:attr(data-n);font-family:'DM Mono',monospace;color:var(--gold);font-size:.7rem;min-width:14px;}
+
+.info-box{background:var(--s1);border-left:3px solid var(--gold);border-radius:0 8px 8px 0;padding:11px 13px;margin-bottom:10px;font-size:.8rem;line-height:1.7;}
+
+.savings-card{background:linear-gradient(135deg,rgba(201,168,76,.08),rgba(76,175,125,.04));border:1px solid rgba(201,168,76,.18);border-radius:14px;padding:18px;margin-bottom:14px;}
+.savings-title{font-family:'Bebas Neue',sans-serif;font-size:1.3rem;letter-spacing:.06em;margin-bottom:4px;}
+.savings-amount{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;color:var(--gold);line-height:1;}
+
+.txn-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);}
+.txn-item:last-child{border-bottom:none;}
+.txn-left{display:flex;flex-direction:column;gap:2px;}
+.txn-desc{font-weight:500;font-size:.82rem;}
+.txn-meta{font-size:.68rem;color:var(--muted);font-family:'DM Mono',monospace;}
+.txn-amt{font-family:'Bebas Neue',sans-serif;font-size:1.15rem;color:var(--red);}
+
+.macro-row{display:flex;gap:6px;margin-top:10px;}
+.macro{flex:1;background:var(--s2);border-radius:8px;padding:8px;text-align:center;}
+.macro-val{font-family:'Bebas Neue',sans-serif;font-size:1.2rem;}
+.macro-lbl{font-size:.62rem;color:var(--muted);letter-spacing:.05em;}
+
+.steps-number{font-family:'Bebas Neue',sans-serif;font-size:3.2rem;color:var(--gold);text-align:center;}
+.steps-label{font-size:.72rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.08em;text-align:center;}
+
+.check-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);cursor:pointer;transition:opacity .15s;}
+.check-row:last-child{border-bottom:none;}
+.check-row:hover{opacity:.8;}
+.check-box{width:18px;height:18px;border:2px solid var(--border2);border-radius:4px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s;}
+.check-box.checked{background:var(--gold);border-color:var(--gold);}
+.check-label{font-size:.82rem;}
+.check-label.done{text-decoration:line-through;color:var(--muted);}
+
+.alert{padding:11px 13px;border-radius:10px;font-size:.78rem;line-height:1.6;margin-bottom:12px;display:flex;gap:10px;}
+.alert-warn{background:rgba(224,125,60,.08);border:1px solid rgba(224,125,60,.2);color:var(--orange);}
+.alert-good{background:rgba(76,175,125,.08);border:1px solid rgba(76,175,125,.2);color:var(--green);}
+.alert-info{background:rgba(76,140,224,.08);border:1px solid rgba(76,140,224,.2);color:var(--blue);}
+
+.divider{height:1px;background:var(--border);margin:14px 0;}
+
+#notifBtn{display:none;position:fixed;bottom:20px;right:20px;z-index:300;background:var(--gold);color:#000;border:none;border-radius:30px;padding:10px 18px;font-family:'DM Mono',monospace;font-size:.72rem;font-weight:600;cursor:pointer;box-shadow:0 4px 20px rgba(201,168,76,.3);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 4px 20px rgba(201,168,76,.3)}50%{box-shadow:0 4px 30px rgba(201,168,76,.5)}}
+
+.disp-hero{padding:14px 20px;background:linear-gradient(135deg,rgba(76,175,125,.06),rgba(76,175,125,.02));border-bottom:1px solid rgba(76,175,125,.15);}
+.disp-val{font-family:'Bebas Neue',sans-serif;font-size:2.4rem;color:var(--green);line-height:1;}
+.disp-label{font-size:.68rem;font-family:'DM Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:3px;}
+</style>
+</head>
+<body>
+
+<div id="notifBanner" onclick="dismissBanner()">
+  <div class="notif-inner">
+    <span id="notifIcon">🔔</span>
+    <span id="notifMsg">Reminder</span>
+    <span class="notif-close">✕</span>
+  </div>
+</div>
+
+<button id="notifBtn" onclick="requestNotifPerm()">🔔 Enable Reminders</button>
+
+<nav>
+  <div class="nav-brand">KOS</div>
+  <div class="nav-tabs">
+    <button class="ntab active" onclick="goPage('dashboard',this)"><span class="ntab-icon">⚡</span>Home</button>
+    <button class="ntab" onclick="goPage('expenses',this)"><span class="ntab-icon">₹</span>Money</button>
+    <button class="ntab" onclick="goPage('breakfast',this)"><span class="ntab-icon">🥗</span>Food</button>
+    <button class="ntab" onclick="goPage('workout',this)"><span class="ntab-icon">💪</span>Workout</button>
+    <button class="ntab" onclick="goPage('skincare',this)"><span class="ntab-icon">✨</span>Skin</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- DASHBOARD -->
+<div class="page active" id="page-dashboard">
+  <div class="reminder-strip" id="reminderStrip"></div>
+  <div class="hero">
+    <div class="hero-date" id="heroDate"></div>
+    <div class="hero-title">GOOD <span id="heroGreeting">MORNING</span>,<br>KARTIK.</div>
+    <div class="hero-sub" id="heroSub"></div>
+  </div>
+  <div class="fixed-bar">
+    <div class="fixed-bar-inner">
+      <span class="fixed-label">Fixed outs</span>
+      <span class="fixed-chip">Rent <span>₹14,500</span></span>
+      <span class="fixed-chip">Invest <span>₹4,000</span></span>
+      <span class="fixed-chip">Help <span>₹3,500</span></span>
+      <span class="fixed-total">−₹22,000</span>
+    </div>
+  </div>
+  <div class="money-row" style="gap:1px;background:var(--border);">
+    <div class="money-cell"><div class="mc-label">Salary</div><div class="mc-val" style="color:var(--green)">₹36,000</div><div class="mc-sub">Goldman Sachs · Apr</div></div>
+    <div class="money-cell"><div class="mc-label">Fixed Out</div><div class="mc-val" style="color:var(--red)">₹22,000</div><div class="mc-sub">Rent+Invest+Help</div></div>
+    <div class="money-cell"><div class="mc-label">Spent (var)</div><div class="mc-val" id="totalSpentVal">₹0</div><div class="mc-sub">Variable this month</div></div>
+    <div class="money-cell"><div class="mc-label">Left to Spend</div><div class="mc-val" id="remainingVal">₹14,000</div><div class="mc-sub">After all deductions</div></div>
+  </div>
+  <div class="disp-hero">
+    <div class="disp-label">Disposable budget used</div>
+    <div style="display:flex;align-items:baseline;gap:8px;">
+      <div class="disp-val" id="dispUsedVal">₹0</div>
+      <div style="font-size:.8rem;color:var(--muted)">of ₹14,000</div>
+    </div>
+    <div class="status-bar" style="height:5px;margin-top:8px;"><div class="status-fill ok" id="dispBar" style="width:0%"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:.68rem;color:var(--muted);font-family:'DM Mono',monospace;">
+      <span id="dispPct">0% used</span><span id="dispLeft">₹14,000 remaining</span>
+    </div>
+  </div>
+  <div class="padded" style="padding-bottom:0">
+    <div class="block-label" style="margin-bottom:10px">App Spend Caps — this month</div>
+    <div id="dashAppCaps"></div>
+  </div>
+  <div class="grid grid-3" style="margin-top:1px">
+    <div class="block"><div class="block-label">Breakfast</div><div id="todayBreakfast" style="font-size:.88rem;font-weight:600;margin-top:2px;"></div><div id="todayBreakfastNote" style="font-size:.7rem;color:var(--muted);margin-top:3px;"></div></div>
+    <div class="block"><div class="block-label">Workout</div><div id="todayWorkout" style="font-size:.88rem;font-weight:600;margin-top:2px;"></div><div id="todayWorkoutNote" style="font-size:.7rem;color:var(--muted);margin-top:3px;"></div></div>
+    <div class="block"><div class="block-label">Skincare AM</div><div style="font-size:.78rem;margin-top:2px;line-height:1.8;color:var(--muted)">Cleanser → SPF<br><span style="color:var(--text);font-weight:500">CeraVe first</span></div></div>
+  </div>
+  <div class="padded">
+    <div class="savings-card">
+      <div class="savings-title">Emergency Fund Goal</div>
+      <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:8px;">
+        <div class="savings-amount" id="efBalance">₹0</div>
+        <div style="font-size:.78rem;color:var(--muted);margin-bottom:6px">of ₹1,20,000</div>
+      </div>
+      <div class="status-bar" style="height:5px;"><div class="status-fill ok" id="efBar" style="width:0%"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:5px;font-size:.68rem;color:var(--muted);font-family:'DM Mono',monospace;">
+        <span id="efPct">0%</span><span id="efMonths">~24 months at ₹5,000/month</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="number" id="efInput" placeholder="Enter current EF balance (₹)" style="flex:1">
+      <button class="btn btn-sm" onclick="updateEF()">Update</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPENSES -->
+<div class="page" id="page-expenses">
+  <div class="sec-hd"><h2>Expense Tracker</h2><p>Track spends · monitor caps · stay on budget</p></div>
+  <div style="padding:14px 20px;background:var(--s1);border-bottom:1px solid var(--border);">
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);border-radius:10px;overflow:hidden;">
+      <div style="background:var(--bg);padding:12px 14px;"><div class="mc-label">Salary</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--green)">₹36,000</div></div>
+      <div style="background:var(--bg);padding:12px 14px;"><div class="mc-label">Fixed Out</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--red)">₹22,000</div><div style="font-size:.62rem;color:var(--muted)">Rent+Invest+Help</div></div>
+      <div style="background:var(--bg);padding:12px 14px;"><div class="mc-label">Disposable Left</div><div style="font-family:'Bebas Neue',sans-serif;font-size:1.6rem;color:var(--gold)" id="expDisposable">₹14,000</div><div id="expDispSub" style="font-size:.62rem;color:var(--muted)">Variable remaining</div></div>
+    </div>
+  </div>
+  <div class="padded">
+    <div class="block-label" style="margin-bottom:8px">Add Expense</div>
+    <div class="exp-form">
+      <div class="exp-row">
+        <select id="expApp">
+          <option value="">App / Merchant</option>
+          <option value="Blinkit">Blinkit</option>
+          <option value="Zomato">Zomato</option>
+          <option value="Swiggy">Swiggy</option>
+          <option value="Amazon">Amazon</option>
+          <option value="Spotify">Spotify</option>
+          <option value="Apple Services">Apple Services</option>
+          <option value="Playo">Playo</option>
+          <option value="BeMinimalist">BeMinimalist</option>
+          <option value="Foxtale">Foxtale</option>
+          <option value="CeraVe">CeraVe</option>
+          <option value="Elior Canteen">Elior Canteen</option>
+          <option value="Petrol">Petrol</option>
+          <option value="Other Food">Other Food</option>
+          <option value="Other Shopping">Other Shopping</option>
+          <option value="Other">Other</option>
+        </select>
+        <select id="expCat">
+          <option value="Food & Dining">Food & Dining</option>
+          <option value="Groceries">Groceries</option>
+          <option value="Entertainment">Entertainment</option>
+          <option value="Shopping">Shopping</option>
+          <option value="Personal Care">Personal Care</option>
+          <option value="Subscriptions">Subscriptions</option>
+          <option value="Transport & Fuel">Transport & Fuel</option>
+          <option value="Bills & Utilities">Bills & Utilities</option>
+          <option value="Miscellaneous">Miscellaneous</option>
+        </select>
+        <input type="number" id="expAmt" placeholder="₹">
+      </div>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="expNote" placeholder="Note (optional)" style="flex:1">
+        <button class="btn" onclick="addExpense()">Add</button>
+      </div>
+    </div>
+    <div class="block-label" style="margin-bottom:8px">App Caps — April</div>
+    <div id="appCapsList"></div>
+    <div class="divider"></div>
+    <div class="savings-card">
+      <div class="savings-title">💸 Emergency Fund Transfer</div>
+      <div class="savings-amount">₹5,000</div>
+      <div style="font-size:.78rem;color:var(--muted);margin-top:4px;">Transfer to your EF account immediately after salary credit</div>
+      <div style="margin-top:12px;font-size:.78rem;color:var(--text);">Weekend food: <strong style="color:var(--gold)">₹800</strong> · Weekday per day: <strong style="color:var(--gold)">₹250</strong></div>
+    </div>
+    <div class="block-label" style="margin-bottom:8px;margin-top:4px;">Recent Transactions</div>
+    <div id="txnList" style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:12px 14px;"></div>
+    <div style="margin-top:12px;text-align:right;"><button class="btn btn-ghost btn-sm" onclick="clearExpenses()">Clear all data</button></div>
+  </div>
+</div>
+
+<!-- BREAKFAST -->
+<div class="page" id="page-breakfast">
+  <div class="sec-hd"><h2>Breakfast Planner</h2><p>Zero sugar · high protein · 5 days planned</p></div>
+  <div class="inner-tabs">
+    <button class="itab active" onclick="switchInner('bfWeek','bfRecipe',this)">Weekly Plan</button>
+    <button class="itab" onclick="switchInner('bfRecipe','bfWeek',this)">Recipes</button>
+  </div>
+  <div id="bfWeek" class="padded">
+    <div id="tomorrowReminder" style="margin-bottom:12px;"></div>
+    <div class="alert alert-info"><span>💡</span><span>All meals are <strong>zero added sugar</strong>. Natural sugars from banana & fruits are fine. No honey in oats — use cinnamon instead.</span></div>
+    <div class="meal-card">
+      <div class="meal-day">Monday · Day 1</div>
+      <div class="meal-name">Overnight Oats Parfait 🍓</div>
+      <div class="meal-tags"><span class="badge badge-gold">Your recipe</span><span class="badge badge-green">Zero sugar</span><span class="badge badge-blue">High protein</span><span class="badge badge-purple">Prep night before</span></div>
+      <div style="font-size:.78rem;color:var(--muted);line-height:1.7">Rolled oats + milk base → paneer & cream layer → chia seeds → blended strawberry layer. Refrigerate overnight. Ready in 0 mins.</div>
+      <div class="macro-row">
+        <div class="macro"><div class="macro-val" style="color:var(--blue)">~35g</div><div class="macro-lbl">Protein</div></div>
+        <div class="macro"><div class="macro-val" style="color:var(--orange)">~55g</div><div class="macro-lbl">Carbs</div></div>
+        <div class="macro"><div class="macro-val" style="color:var(--gold)">~18g</div><div class="macro-lbl">Fat</div></div>
+        <div class="macro"><div class="macro-val" style="color:var(--green)">~510</div><div class="macro-lbl">kcal</div></div>
+      </div>
+      <div class="meal-reminder">⏰ Sunday evening: Keep strawberries, chia, paneer, fresh cream ready before 6 PM</div>
+    </div>
+    <div class="meal-card" style="border-left-color:var(--blue)">
+      <div class="meal-day">Tuesday · Day 2</div>
+      <div class="meal-name">Office Breakfast 🏢</div>
+      <div class="meal-tags"><span class="badge badge-blue">Office</span><span class="badge badge-green">No prep needed</span></div>
+      <div style="font-size:.78rem;color:var(--muted);line-height:1.7">Canteen breakfast. Protein-first — eggs, idli, upma, poha. Skip sugar in tea/coffee.</div>
+      <div style="font-size:.7rem;color:var(--blue);margin-top:8px;">💡 Black coffee before workout → eat office breakfast after reaching office</div>
+    </div>
+    <div class="meal-card" style="border-left-color:var(--green)">
+      <div class="meal-day">Wednesday · Day 3</div>
+      <div class="meal-name">Spinach Omelette 🥚</div>
+      <div class="meal-tags"><span class="badge badge-green">Zero sugar</span><span class="badge badge-blue">High protein</span><span class="badge badge-gold">10 mins</span></div>
+      <div style="font-size:.78rem;color:var(--muted);line-height:1.7">3 eggs + fresh spinach + boiled potato + cheese. Season with pepper, cumin, turmeric. Pan fry in ghee.</div>
+      <div class="macro-row">
+        <div class="macro"><div class="macro-val" style="color:var(--blue)">~28g</div><div class="macro-lbl">Protein</div></div>
+        <div class="macro"><div class="macro-val" style="color:var(--orange)">~22g</div><div class="macro-lbl">Carbs</div></div>
+        <div class="macro"><div class="macro-val" style="color:var(--gold)">~20g</div><div class="macro-lbl">Fat</div></div>
+        <div class="macro"><div class="macro-val" style="color:var(--green)">~380</div><div class="macro-lbl">kcal</div></div>
+      </div>
+      <div class="meal-reminder" style="border-color:rgba(76,175,125,.2);background:rgba(76,175,125,.06);color:var(--green);">⏰ Tuesday evening: Buy fresh spinach before 6 PM if not at home</div>
+    </div>
+    <div class="meal-card" style="border-left-color:var(--orange)">
+      <div class="meal-day">Thursday · Day 4</div>
+      <div class="meal-name">Office Breakfast 🏢</div>
+      <div class="meal-tags"><span class="badge badge-blue">Office</span><span class="badge badge-green">No prep</span></div>
+      <div style="font-size:.78rem;color:var(--muted);line-height:1.7">Second office day. Protein-first, avoid sugar-heavy items.</div>
+    </div>
+    <div class="meal-card" style="border-left-color:var(--purple)">
+      <div class="meal-day">Friday · Day 5</div>
+      <div class="meal-name">Marinated Paneer 🧀</div>
+      <div class="meal-tags"><span class="badge badge-purple">Zero sugar</span><span class="badge badge-blue">High protein</span><span class="badge badge-gold">15 mins</span></div>
+      <div style="font-size:.78rem;color:var(--muted);line-height:1.7">200g paneer · marinate with curd, turmeric, chilli, jeera, garam masala · air fry or pan sear · serve with cucumber.</div>
+      <div class="macro-row">
+        <div class="macro"><div class="macro-val" style="color:var(--blue)">~32g</div><div class="macro-lbl">Protein</div></div>
+        <div class="macro"><div class="macro-val" style="color:var(--orange)">~8g</div><div class="macro-lbl">Carbs</div></div>
+        <div class="macro"><div class="macro-val" style="color:var(--gold)">~26g</div><div class="macro-lbl">Fat</div></div>
+        <div class="macro"><div class="macro-val" style="color:var(--green)">~390</div><div class="macro-lbl">kcal</div></div>
+      </div>
+      <div class="meal-reminder" style="border-color:rgba(156,108,224,.2);background:rgba(156,108,224,.06);color:var(--purple);">⏰ Thursday evening: Marinate paneer the night before — 8 hours = max flavour</div>
+    </div>
+    <div class="meal-card">
+      <div class="meal-day">Bonus · Weekend Swap</div>
+      <div class="meal-name">Yogabar Oats + Banana 🍌</div>
+      <div class="meal-tags"><span class="badge badge-gold">Your choice</span><span class="badge badge-green">5 mins</span><span class="badge badge-orange">Use sparingly</span></div>
+      <div style="font-size:.78rem;color:var(--muted);line-height:1.7">Plain Yogabar oats + 1 banana + cinnamon + chia. Skip honey on strict days.</div>
+      <div class="alert alert-warn" style="margin-top:10px;padding:8px 10px;font-size:.72rem;"><span>⚠️</span><span>Use plain oats variant only. Flavoured = added sugar.</span></div>
+    </div>
+  </div>
+  <div id="bfRecipe" class="padded" style="display:none">
+    <div class="block-label" style="margin-bottom:12px">Detailed Recipes</div>
+    <div class="meal-card">
+      <div class="meal-name" style="margin-bottom:8px">Overnight Oats Parfait — Your Recipe</div>
+      <div class="recipe-box">
+        <div class="recipe-title">Ingredients (1 serving)</div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:2;margin-bottom:10px;">½ cup rolled oats · ¾ cup whole milk · 80g fresh paneer (blended) · 2 tbsp fresh cream · 2 tbsp chia seeds · 6–8 strawberries · pinch of cinnamon</div>
+        <div class="recipe-title">Method</div>
+        <div class="recipe-step" data-n="1">Add oats to a glass/bowl. Pour milk over. Stir well.</div>
+        <div class="recipe-step" data-n="2">Blend paneer + fresh cream until smooth. Add cinnamon. Pour as second layer.</div>
+        <div class="recipe-step" data-n="3">Sprinkle chia seeds as third layer.</div>
+        <div class="recipe-step" data-n="4">Blend strawberries (no sugar). Pour as top layer.</div>
+        <div class="recipe-step" data-n="5">Cover and refrigerate overnight (minimum 6 hours).</div>
+        <div class="recipe-step" data-n="6">Morning: eat straight from fridge. Zero cooking needed.</div>
+      </div>
+    </div>
+    <div class="meal-card" style="border-left-color:var(--green)">
+      <div class="meal-name" style="margin-bottom:8px">Spinach Omelette — Detailed</div>
+      <div class="recipe-box">
+        <div class="recipe-title">Ingredients</div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:2;margin-bottom:10px;">3 whole eggs · 1 cup fresh spinach (chopped) · 1 small potato (boiled, diced) · 30g cheese · salt, pepper, cumin, turmeric · 1 tsp ghee</div>
+        <div class="recipe-title">Method</div>
+        <div class="recipe-step" data-n="1">Boil potato the night before. Saves 15 mins in morning.</div>
+        <div class="recipe-step" data-n="2">Beat 3 eggs with salt, pepper, turmeric, cumin.</div>
+        <div class="recipe-step" data-n="3">Heat pan on medium. Add ghee. Sauté spinach 1 minute.</div>
+        <div class="recipe-step" data-n="4">Add diced potato. Toss 30 seconds.</div>
+        <div class="recipe-step" data-n="5">Pour egg mixture over. Let set 2 mins. Flip.</div>
+        <div class="recipe-step" data-n="6">Add cheese on top. Fold. Serve immediately.</div>
+      </div>
+    </div>
+    <div class="meal-card" style="border-left-color:var(--purple)">
+      <div class="meal-name" style="margin-bottom:8px">Marinated Paneer — Night Prep</div>
+      <div class="recipe-box">
+        <div class="recipe-title">Marinade (previous night)</div>
+        <div style="font-size:.78rem;color:var(--muted);line-height:2;margin-bottom:10px;">200g paneer (cubed) · 3 tbsp hung curd · ½ tsp turmeric · 1 tsp red chilli · 1 tsp jeera · ½ tsp garam masala · salt · 1 tsp ginger-garlic paste · squeeze of lemon</div>
+        <div class="recipe-title">Method</div>
+        <div class="recipe-step" data-n="1">Mix all marinade. Coat paneer fully.</div>
+        <div class="recipe-step" data-n="2">Cover and refrigerate overnight.</div>
+        <div class="recipe-step" data-n="3">Morning: heat air fryer/pan to high.</div>
+        <div class="recipe-step" data-n="4">Air fry 200°C 8 mins OR pan sear 2 mins per side.</div>
+        <div class="recipe-step" data-n="5">Serve with cucumber + mint. No bread needed.</div>
+      </div>
+    </div>
+    <div class="info-box"><strong style="color:var(--gold)">Pre-workout:</strong> Black coffee 20–30 mins before 5 AM workout. Train fasted. Eat breakfast after workout (6:30–7 AM).</div>
+  </div>
+</div>
+
+<!-- WORKOUT -->
+<div class="page" id="page-workout">
+  <div class="sec-hd"><h2>Workout Plan</h2><p>5:00 AM – 6:30 AM · 90 mins · Mon–Fri</p></div>
+  <div class="padded">
+    <div class="alert alert-info"><span>☕</span><span><strong>4:45 AM</strong> — warm lemon water + pink salt. <strong>5:00 AM</strong> — black coffee. Train fasted. Eat at 7 AM.</span></div>
+    <div class="workout-card">
+      <div class="workout-header"><div><div class="workout-day">Monday — Steps + Abs</div><div style="font-size:.72rem;color:var(--muted)">5:00–6:30 AM · 90 mins</div></div><span class="badge badge-orange">Core Day</span></div>
+      <div class="exercise-list">
+        <div class="exercise-row"><span class="exercise-name">🚶 Brisk Walk / Jog</span><span class="exercise-detail">40 min · ~5,000 steps</span></div>
+        <div class="exercise-row"><span class="exercise-name">Plank (3 sets)</span><span class="exercise-detail">30–60 sec each</span></div>
+        <div class="exercise-row"><span class="exercise-name">Crunches</span><span class="exercise-detail">3×20 reps</span></div>
+        <div class="exercise-row"><span class="exercise-name">Leg Raises</span><span class="exercise-detail">3×15 reps</span></div>
+        <div class="exercise-row"><span class="exercise-name">Bicycle Crunches</span><span class="exercise-detail">3×20 reps</span></div>
+        <div class="exercise-row"><span class="exercise-name">Mountain Climbers</span><span class="exercise-detail">3×30 sec</span></div>
+        <div class="exercise-row"><span class="exercise-name">🧘 Stretch + Mobility</span><span class="exercise-detail">10 min</span></div>
+      </div>
+    </div>
+    <div class="workout-card">
+      <div class="workout-header"><div><div class="workout-day">Tuesday — Steps + Arms</div><div style="font-size:.72rem;color:var(--muted)">5:00–6:30 AM · 90 mins</div></div><span class="badge badge-blue">Push Day</span></div>
+      <div class="exercise-list">
+        <div class="exercise-row"><span class="exercise-name">🚶 Brisk Walk / Jog</span><span class="exercise-detail">35 min · ~4,500 steps</span></div>
+        <div class="exercise-row"><span class="exercise-name">Push-ups (wide grip)</span><span class="exercise-detail">4×15 · chest+triceps</span></div>
+        <div class="exercise-row"><span class="exercise-name">Diamond Push-ups</span><span class="exercise-detail">3×10 · triceps focus</span></div>
+        <div class="exercise-row"><span class="exercise-name">Pike Push-ups</span><span class="exercise-detail">3×12 · shoulders</span></div>
+        <div class="exercise-row"><span class="exercise-name">Tricep Dips (chair)</span><span class="exercise-detail">3×15</span></div>
+        <div class="exercise-row"><span class="exercise-name">🧘 Stretch</span><span class="exercise-detail">10 min</span></div>
+      </div>
+    </div>
+    <div class="workout-card">
+      <div class="workout-header"><div><div class="workout-day">Wednesday — Active Recovery</div><div style="font-size:.72rem;color:var(--muted)">5:00–6:30 AM · 90 mins</div></div><span class="badge badge-green">Recovery</span></div>
+      <div class="exercise-list">
+        <div class="exercise-row"><span class="exercise-name">🚶 Long Walk (no run)</span><span class="exercise-detail">60 min · ~7,000 steps</span></div>
+        <div class="exercise-row"><span class="exercise-name">Full body stretch</span><span class="exercise-detail">15 min</span></div>
+        <div class="exercise-row"><span class="exercise-name">Breathing / Pranayama</span><span class="exercise-detail">10 min · box breathing</span></div>
+        <div class="exercise-row"><span class="exercise-name">Dead bugs (core)</span><span class="exercise-detail">2×10 · low intensity</span></div>
+      </div>
+    </div>
+    <div class="workout-card">
+      <div class="workout-header"><div><div class="workout-day">Thursday — Steps + Arms (Progressive)</div><div style="font-size:.72rem;color:var(--muted)">5:00–6:30 AM · 90 mins</div></div><span class="badge badge-purple">Pull Day</span></div>
+      <div class="exercise-list">
+        <div class="exercise-row"><span class="exercise-name">🚶 Brisk Walk / Jog</span><span class="exercise-detail">35 min · ~4,500 steps</span></div>
+        <div class="exercise-row"><span class="exercise-name">Pull-ups / Inverted rows</span><span class="exercise-detail">4×8–12 · biceps+back</span></div>
+        <div class="exercise-row"><span class="exercise-name">Chin-ups (supinated)</span><span class="exercise-detail">3×8 · biceps peak</span></div>
+        <div class="exercise-row"><span class="exercise-name">Hammer curls (if dumbbells)</span><span class="exercise-detail">3×15 each arm</span></div>
+        <div class="exercise-row"><span class="exercise-name">Isometric bicep hold</span><span class="exercise-detail">3×20 sec</span></div>
+        <div class="exercise-row"><span class="exercise-name">🧘 Stretch</span><span class="exercise-detail">10 min</span></div>
+      </div>
+    </div>
+    <div class="workout-card">
+      <div class="workout-header"><div><div class="workout-day">Friday — Full Circuit</div><div style="font-size:.72rem;color:var(--muted)">5:00–6:30 AM · 90 mins</div></div><span class="badge badge-gold">Circuit</span></div>
+      <div class="exercise-list">
+        <div class="exercise-row"><span class="exercise-name">🚶 Jog / Run</span><span class="exercise-detail">30 min · ~4,000 steps</span></div>
+        <div class="exercise-row"><span class="exercise-name">Burpees</span><span class="exercise-detail">3×10 · full body</span></div>
+        <div class="exercise-row"><span class="exercise-name">Push-up to Plank</span><span class="exercise-detail">3×10 combo</span></div>
+        <div class="exercise-row"><span class="exercise-name">V-ups (abs)</span><span class="exercise-detail">3×15</span></div>
+        <div class="exercise-row"><span class="exercise-name">Jump squats</span><span class="exercise-detail">3×12</span></div>
+        <div class="exercise-row"><span class="exercise-name">🧘 Full body stretch</span><span class="exercise-detail">15 min</span></div>
+      </div>
+    </div>
+    <div class="block-label" style="margin:14px 0 10px">Daily Steps Tracker</div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:16px;">
+      <div style="padding:16px 0 12px;"><div class="steps-number" id="stepsCount">0</div><div class="steps-label">/ 10,000 steps today</div></div>
+      <div class="status-bar" style="height:6px;margin-bottom:12px;"><div class="status-fill ok" id="stepsBar" style="width:0%"></div></div>
+      <div style="display:flex;gap:8px;"><input type="number" id="stepsInput" placeholder="Enter today's steps" style="flex:1"><button class="btn btn-sm" onclick="updateSteps()">Log</button></div>
+    </div>
+    <div class="block-label" style="margin:14px 0 10px">Today's Checklist</div>
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:12px 14px;" id="workoutChecklist">
+      <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">☕ Black coffee at 4:45 AM</div></div>
+      <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">🏃 Completed walk / run target</div></div>
+      <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">💪 Strength workout done</div></div>
+      <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">🧘 Stretching / mobility done</div></div>
+      <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">🥗 Post-workout breakfast eaten</div></div>
+      <div class="check-row" onclick="toggleCheck(this)"><div class="check-box"></div><div class="check-label">👟 10,000 steps achieved</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SKINCARE -->
+<div class="page" id="page-skincare">
+  <div class="sec-hd"><h2>Skincare Routine</h2><p>AM + PM · Hyderabad climate optimised · budget-tracked</p></div>
+  <div class="inner-tabs">
+    <button class="itab active" onclick="switchInner('skAM','skPM',this)">Morning (AM)</button>
+    <button class="itab" onclick="switchInner('skPM','skAM',this)">Night (PM)</button>
+  </div>
+  <div id="skAM" class="padded">
+    <div class="alert alert-info" style="margin-bottom:12px;"><span>☀️</span><span>AM routine: 5–7 minutes. After workout, post-shower. <strong>Never skip SPF</strong> — Hyderabad UV is brutal year-round.</span></div>
+    <div class="routine-card">
+      <div class="routine-step"><div class="step-num">1</div><div><div class="step-name">Cleanser</div><div class="step-note">Wet face, massage 30 sec, rinse lukewarm. Pat dry — never rub.</div><div class="step-product">✅ CeraVe Hydrating Cleanser (just bought)</div></div></div>
+      <div class="routine-step"><div class="step-num">2</div><div><div class="step-name">Toner (optional for now)</div><div class="step-note">Apply on cotton pad, sweep across face. Skip until you buy Paula's Choice next month.</div><div class="step-product">📋 Paula's Choice Skin Balancing Toner (buy Month 2, ₹2,230)</div></div></div>
+      <div class="routine-step"><div class="step-num">3</div><div><div class="step-name">Moisturiser</div><div class="step-note">Light layer, focus cheeks + forehead. If oily, skip in Hyderabad heat.</div><div class="step-product">📋 Any basic moisturiser you have</div></div></div>
+      <div class="routine-step"><div class="step-num">4</div><div><div class="step-name">SPF 50+ ⚡ NEVER SKIP</div><div class="step-note">Apply generously 15 mins before going out. Most important anti-aging step. Nothing else matters if you skip this.</div><div class="step-product">📋 Minimalist SPF 50 PA+++ (₹350) or Re'equil Mineral SPF 50</div></div></div>
+    </div>
+    <div class="info-box"><strong style="color:var(--gold)">Budget:</strong> CeraVe (₹468, lasts 2–3 months) = ~₹300/month. SPF (₹350, 2 months) = ₹175/month. Total: ~₹475/month — within ₹700 cap.</div>
+  </div>
+  <div id="skPM" class="padded" style="display:none;">
+    <div class="alert alert-good" style="margin-bottom:12px;"><span>🌙</span><span>PM routine: 3–4 minutes. Right before sleep. Night is when skin repairs. Keep it simple.</span></div>
+    <div class="alert alert-warn" style="margin-bottom:12px;"><span>⏰</span><span><strong>Reminder at 10 PM daily</strong> — do your PM skincare before you forget. Enable browser notifications for this!</span></div>
+    <div class="routine-card">
+      <div class="routine-step"><div class="step-num">1</div><div><div class="step-name">Double Cleanse (if wore SPF)</div><div class="step-note">First: micellar water to remove SPF. Second: CeraVe cleanser. One cleanse if stayed indoors.</div><div class="step-product">✅ CeraVe Hydrating Cleanser</div></div></div>
+      <div class="routine-step"><div class="step-num">2</div><div><div class="step-name">Niacinamide Serum (highly recommended)</div><div class="step-note">Reduces pores, controls oil, evens tone. 2–3 drops. Wait 30 sec before next step.</div><div class="step-product">📋 Minimalist 10% Niacinamide (₹599, 3 months) — buy Month 3</div></div></div>
+      <div class="routine-step"><div class="step-num">3</div><div><div class="step-name">Night Moisturiser</div><div class="step-note">Slightly richer than AM. Skin repairs 11 PM–3 AM — be asleep by then.</div><div class="step-product">📋 CeraVe Moisturising Cream (₹699) or any basic night cream</div></div></div>
+    </div>
+    <div class="block-label" style="margin-top:14px;margin-bottom:10px">3-Month Skincare Roadmap</div>
+    <div class="app-card">
+      <div style="font-size:.82rem;line-height:2.2;">
+        <div><span class="badge badge-gold" style="margin-right:8px;">Month 1 (Now)</span>CeraVe cleanser · build the habit · ₹468 one-time</div>
+        <div><span class="badge badge-blue" style="margin-right:8px;">Month 2</span>Paula's Choice toner (₹2,230) + SPF 50 (₹350) · save ₹1,500 extra</div>
+        <div><span class="badge badge-green" style="margin-right:8px;">Month 3</span>Minimalist Niacinamide (₹599) · full routine · ₹500/month maintenance</div>
+      </div>
+    </div>
+    <div class="info-box" style="border-color:var(--purple);"><strong style="color:var(--purple)">Key rule:</strong> One new product at a time. Wait 2 weeks between additions. If skin reacts, you'll know exactly which product.</div>
+  </div>
+</div>
+
+</main>
+
+<script>
+const SALARY = 36000;
+const FIXED_TOTAL = 22000; // rent 14500 + invest 4000 + help 3500
+const DISPOSABLE = SALARY - FIXED_TOTAL; // 14000
+
+const STATE = {
+  expenses: JSON.parse(localStorage.getItem('kk_expenses_v2') || '[]'),
+  efBalance: parseFloat(localStorage.getItem('kk_ef') || '0'),
+  steps: parseInt(localStorage.getItem('kk_steps') || '0'),
+};
+
+const CAPS = {
+  "Blinkit":1500,"Zomato":800,"Swiggy":300,"Amazon":1200,
+  "Spotify":119,"Apple Services":349,"Playo":600,"BeMinimalist":500,
+  "Foxtale":300,"CeraVe":700,"Elior Canteen":1500,"Petrol":4000,
+  "Other Food":500,"Other Shopping":800,"Other":500,
+};
+
+const PRELOADED = [
+  {app:"CeraVe",cat:"Personal Care",amt:468,note:"Hydrating Cleanser",date:"2026-04-26"},
+];
+
+if(STATE.expenses.length===0){ STATE.expenses=PRELOADED.slice(); save(); }
+
+function save(){
+  localStorage.setItem('kk_expenses_v2',JSON.stringify(STATE.expenses));
+  localStorage.setItem('kk_ef',STATE.efBalance);
+  localStorage.setItem('kk_steps',STATE.steps);
+}
+
+function goPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.ntab').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  renderAll();
+  window.scrollTo(0,0);
+}
+
+function switchInner(show,hide,btn){
+  document.getElementById(show).style.display='block';
+  document.getElementById(hide).style.display='none';
+  btn.parentElement.querySelectorAll('.itab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function renderHero(){
+  const now=new Date();
+  const days=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const h=now.getHours();
+  document.getElementById('heroGreeting').textContent=h<12?'MORNING':h<17?'AFTERNOON':'EVENING';
+  document.getElementById('heroDate').textContent=`${days[now.getDay()]} · ${now.getDate()} ${months[now.getMonth()]} ${now.getFullYear()}`;
+  const d=now.getDay();
+  const bf=['Rest Day','Overnight Oats Parfait 🍓','Office Breakfast 🏢','Spinach Omelette 🥚','Office Breakfast 🏢','Marinated Paneer 🧀','Prep Day'];
+  const wo=['Rest','Steps + Abs','Steps + Arms','Active Recovery','Steps + Arms (Pull)','Full Circuit','Rest'];
+  const wn=['Rest & recover','Planks, crunches, leg raises','Push-ups, dips, tricep work','60 min walk + stretch','Pull-ups, chin-ups, biceps','Burpees, V-ups, full circuit','Light walk optional'];
+  document.getElementById('todayBreakfast').textContent=bf[d]||'Rest Day';
+  document.getElementById('todayWorkout').textContent=wo[d]||'Rest';
+  document.getElementById('todayWorkoutNote').textContent=wn[d]||'';
+  const spent=getTotalSpent();
+  document.getElementById('heroSub').textContent=`₹${fmtINR(Math.round(spent))} variable spent · ₹${fmtINR(Math.max(0,Math.round(DISPOSABLE-spent)))} disposable left`;
+}
+
+function renderReminders(){
+  const now=new Date();
+  const h=now.getHours();
+  const tomorrow=new Date(now); tomorrow.setDate(tomorrow.getDate()+1);
+  const tmr=tomorrow.getDay();
+  const mealRem={
+    3:{text:"🛒 Buy spinach today — Spinach Omelette tomorrow!",cls:''},
+    5:{text:"🧀 Buy paneer + start marinade tonight — Paneer Friday!",cls:''},
+    0:{text:"🍓 Get strawberries, chia & cream today — Oats Parfait Monday!",cls:''},
+  };
+  const chips=[];
+  if(mealRem[tmr]) chips.push(mealRem[tmr]);
+  if(h>=17&&h<20) chips.push({text:"🛒 6 PM Grocery Window — check your fridge now!",cls:'green'});
+  if(h>=21||h<1) chips.push({text:"✨ 10 PM — Time for your PM Skincare Routine!",cls:'blue'});
+  const pct=getTotalSpent()/DISPOSABLE;
+  if(pct>0.85) chips.push({text:`⚠️ ${Math.round(pct*100)}% of disposable budget used!`,cls:''});
+  const strip=document.getElementById('reminderStrip');
+  strip.innerHTML=chips.map(c=>`<div class="rem-chip ${c.cls}">${c.text}</div>`).join('');
+  strip.style.display=chips.length?'flex':'none';
+  const trEl=document.getElementById('tomorrowReminder');
+  if(trEl) trEl.innerHTML=mealRem[tmr]?`<div class="rem-chip" style="border-radius:10px;padding:10px 14px;">${mealRem[tmr].text}</div>`:'';
+}
+
+function fmtINR(n){return n.toLocaleString('en-IN');}
+function getAppSpent(app){return STATE.expenses.filter(e=>e.app===app).reduce((s,e)=>s+e.amt,0);}
+function getTotalSpent(){return STATE.expenses.reduce((s,e)=>s+e.amt,0);}
+
+function renderMoneyBlocks(){
+  const spent=getTotalSpent();
+  const rem=DISPOSABLE-spent;
+  const pct=Math.min(spent/DISPOSABLE*100,100).toFixed(1);
+  document.getElementById('totalSpentVal').textContent='₹'+fmtINR(Math.round(spent));
+  document.getElementById('totalSpentVal').style.color=pct>85?'var(--red)':pct>60?'var(--orange)':'var(--text)';
+  const remEl=document.getElementById('remainingVal');
+  remEl.textContent='₹'+fmtINR(Math.max(0,Math.round(rem)));
+  remEl.style.color=rem<2000?'var(--red)':rem<5000?'var(--orange)':'var(--green)';
+  document.getElementById('dispUsedVal').textContent='₹'+fmtINR(Math.round(spent));
+  document.getElementById('dispBar').style.width=pct+'%';
+  document.getElementById('dispBar').className='status-fill '+(pct>85?'over':pct>60?'warn':'ok');
+  document.getElementById('dispPct').textContent=pct+'% used';
+  document.getElementById('dispLeft').textContent='₹'+fmtINR(Math.max(0,Math.round(rem)))+' remaining';
+  const ed=document.getElementById('expDisposable');
+  if(ed){
+    ed.textContent='₹'+fmtINR(Math.max(0,Math.round(rem)));
+    ed.style.color=rem<2000?'var(--red)':rem<5000?'var(--orange)':'var(--gold)';
+    document.getElementById('expDispSub').textContent=`of ₹${fmtINR(DISPOSABLE)} total`;
+  }
+}
+
+function renderAppCaps(id){
+  const el=document.getElementById(id);
+  if(!el) return;
+  const apps=['Blinkit','Zomato','Swiggy','Elior Canteen','Apple Services','Spotify','Playo','BeMinimalist','CeraVe','Petrol'];
+  el.innerHTML=apps.map(app=>{
+    const cap=CAPS[app],spent=getAppSpent(app),pct=Math.min(spent/cap*100,100).toFixed(0),rem=Math.max(cap-spent,0);
+    const cls=spent>cap?'over':spent/cap>0.8?'warn':'ok';
+    const badge=spent>cap?`<span class="badge badge-red">Over ₹${fmtINR(Math.round(spent-cap))}</span>`:spent/cap>0.8?`<span class="badge badge-orange">₹${fmtINR(Math.round(rem))} left</span>`:`<span class="badge badge-green">₹${fmtINR(Math.round(rem))} left</span>`;
+    return `<div class="app-card"><div class="app-top"><div><div class="app-name">${app}</div>${badge}</div><div style="text-align:right"><div class="app-spent" style="color:${spent>cap?'var(--red)':spent/cap>0.8?'var(--orange)':'var(--text)'}">${fmtINR(Math.round(spent))}</div><div class="app-cap-label">cap ₹${fmtINR(cap)}</div></div></div><div class="status-bar"><div class="status-fill ${cls}" style="width:${pct}%"></div></div></div>`;
+  }).join('');
+}
+
+function renderDashAppCaps(){
+  const el=document.getElementById('dashAppCaps');
+  if(!el) return;
+  ['Blinkit','Zomato','Elior Canteen','Playo'].forEach(app=>{
+    const cap=CAPS[app],spent=getAppSpent(app),pct=Math.min(spent/cap*100,100).toFixed(0);
+    const cls=spent>cap?'over':spent/cap>0.8?'warn':'ok';
+    el.innerHTML+= `<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:.78rem;margin-bottom:5px;"><span>${app}</span><span style="font-family:'DM Mono',monospace;font-size:.68rem;color:var(--muted)">₹${fmtINR(Math.round(spent))} / ₹${fmtINR(cap)}</span></div><div class="status-bar"><div class="status-fill ${cls}" style="width:${pct}%"></div></div></div>`;
+  });
+}
+
+function renderTxnList(){
+  const el=document.getElementById('txnList');
+  if(!el) return;
+  const s=[...STATE.expenses].sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  if(!s.length){el.innerHTML='<div style="font-size:.78rem;color:var(--muted);text-align:center;padding:16px 0;">No expenses yet.</div>';return;}
+  el.innerHTML=s.slice(0,25).map(e=>`<div class="txn-item"><div class="txn-left"><div class="txn-desc">${e.app}${e.note?' — '+e.note:''}</div><div class="txn-meta">${e.cat} · ${e.date||'today'}</div></div><div class="txn-amt">₹${fmtINR(Math.round(e.amt))}</div></div>`).join('');
+}
+
+function addExpense(){
+  const app=document.getElementById('expApp').value;
+  const cat=document.getElementById('expCat').value;
+  const amt=parseFloat(document.getElementById('expAmt').value);
+  const note=document.getElementById('expNote').value.trim();
+  if(!app||!amt||amt<=0){alert('Select an app and enter an amount.');return;}
+  STATE.expenses.push({app,cat,amt,note,date:new Date().toISOString().split('T')[0]});
+  save();renderAll();
+  document.getElementById('expAmt').value='';
+  document.getElementById('expNote').value='';
+  const spent=getAppSpent(app),cap=CAPS[app]||999999;
+  if(spent>cap) showBanner(`⚠️ ${app} cap exceeded! ₹${fmtINR(Math.round(spent))} vs cap ₹${fmtINR(cap)}`,'⚠️');
+}
+
+function clearExpenses(){
+  if(confirm('Clear all expense data?')){STATE.expenses=PRELOADED.slice();save();renderAll();}
+}
+
+function updateSteps(){
+  const val=parseInt(document.getElementById('stepsInput').value);
+  if(!val) return;
+  STATE.steps=val;save();
+  document.getElementById('stepsCount').textContent=fmtINR(val);
+  const bar=document.getElementById('stepsBar');
+  bar.style.width=Math.min(val/10000*100,100)+'%';
+  bar.className='status-fill '+(val>=10000?'ok':val>=7000?'warn':'over');
+  if(val>=10000) showBanner('🎉 10,000 steps crushed today, Kartik!','👟');
+}
+
+function updateEF(){
+  const val=parseFloat(document.getElementById('efInput').value);
+  if(isNaN(val)) return;
+  STATE.efBalance=val;save();renderEF();
+}
+function renderEF(){
+  const bal=STATE.efBalance,pct=Math.min(bal/120000*100,100).toFixed(1),months=Math.ceil((120000-bal)/5000);
+  document.getElementById('efBalance').textContent='₹'+fmtINR(Math.round(bal));
+  document.getElementById('efBar').style.width=pct+'%';
+  document.getElementById('efPct').textContent=pct+'% complete';
+  document.getElementById('efMonths').textContent=bal>=120000?'🎉 Goal achieved!':`~${months} months at ₹5,000/month`;
+}
+
+function toggleCheck(row){
+  const box=row.querySelector('.check-box'),lbl=row.querySelector('.check-label');
+  box.classList.toggle('checked');lbl.classList.toggle('done');
+  box.innerHTML=box.classList.contains('checked')?'<svg width="11" height="11" viewBox="0 0 12 12" fill="none"><path d="M2 6l3 3 5-5" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>':'';
+}
+
+let bannerTimer=null;
+function showBanner(msg,icon='🔔'){
+  document.getElementById('notifMsg').textContent=msg;
+  document.getElementById('notifIcon').textContent=icon;
+  document.getElementById('notifBanner').style.display='block';
+  clearTimeout(bannerTimer);
+  bannerTimer=setTimeout(()=>{document.getElementById('notifBanner').style.display='none';},7000);
+}
+function dismissBanner(){document.getElementById('notifBanner').style.display='none';}
+
+function requestNotifPerm(){
+  if(!('Notification' in window)){alert('Notifications not supported on this browser.');return;}
+  Notification.requestPermission().then(p=>{
+    if(p==='granted'){
+      document.getElementById('notifBtn').style.display='none';
+      scheduleNotifications();
+      new Notification('Kartik OS 🔔',{body:'Reminders enabled! Skincare at 10 PM, Groceries at 6 PM.'});
+    }
+  });
+}
+
+function scheduleNotifications(){
+  if(Notification.permission!=='granted') return;
+  function daily(h,m,title,body){
+    const now=new Date(),next=new Date();
+    next.setHours(h,m,0,0);
+    if(next<=now) next.setDate(next.getDate()+1);
+    setTimeout(()=>{
+      new Notification(title,{body,tag:title});
+      showBanner(body,'🔔');
+      setInterval(()=>{new Notification(title,{body,tag:title});showBanner(body,'🔔');},86400000);
+    },next-now);
+  }
+  daily(22,0,'✨ Skincare Time, Kartik!','Your 10 PM PM routine — cleanser, niacinamide, moisturiser. 4 mins!');
+  daily(18,0,'🛒 6 PM Grocery Check','Check tomorrow\'s breakfast ingredients before stores get crowded!');
+}
+
+function initNotifications(){
+  if(!('Notification' in window)) return;
+  if(Notification.permission==='granted') scheduleNotifications();
+  else if(Notification.permission!=='denied') document.getElementById('notifBtn').style.display='block';
+}
+
+function checkTimedBanners(){
+  const h=new Date().getHours(),m=new Date().getMinutes();
+  if(h===18&&m<5) showBanner('🛒 6 PM — Check tomorrow\'s grocery list!','🛒');
+  if(h===22&&m<5) showBanner('✨ 10 PM — PM Skincare time! CeraVe → Moisturiser.','✨');
+}
+
+<script>
+function renderAll(){
+  renderHero();renderReminders();renderMoneyBlocks();
+  document.getElementById('dashAppCaps').innerHTML='';
+  renderDashAppCaps();renderAppCaps('appCapsList');renderTxnList();renderEF();
+  const sc=document.getElementById('stepsCount');
+  if(sc) sc.textContent=fmtINR(STATE.steps);
+  const sb=document.getElementById('stepsBar');
+  if(sb){
+    sb.style.width=Math.min(STATE.steps/10000*100,100)+'%';
+    sb.className='status-fill '+(STATE.steps>=10000?'ok':STATE.steps>=7000?'warn':'over');
+  }
+}
+</script>
+
+<!-- LOAD YOUR NEW FEATURES FILE -->
+<script src="script.js"></script>
+
+<script>
+renderAll();
+initNotifications();
+checkTimedBanners();
+
+setInterval(checkTimedBanners, 5 * 60 * 1000);
+setInterval(renderReminders, 60 * 1000);
+</script>
+
+<!-- BREAK SYSTEM UI -->
+<div id="break-container" style="margin-top:20px; text-align:center;">
+  <button onclick="startBreak()" class="app-card">Take a Break</button>
+  <p id="break-status" style="margin-top:10px;"></p>
+</div>
+
+</body>
+</html>
