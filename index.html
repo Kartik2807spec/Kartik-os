@@ -203,9 +203,22 @@ select:focus,input:focus{outline:1px solid var(--gold);border-color:var(--gold);
 button:active {
   transform: scale(0.95);
 }</style>
+  * {
+  transition: all 0.2s ease;
+}
 </head>
 <body>
+body {
+  padding: 10px;
+}
 
+.app-card {
+  transition: all 0.2s ease;
+}
+
+.app-card:active {
+  transform: scale(0.98);
+}
 <nav>
   <div class="nav-brand">KARTIK OS</div>
   <div class="nav-tabs">
@@ -218,7 +231,9 @@ button:active {
 </nav>
 
 <main>
-
+<div style="text-align:center; margin-top:10px;">
+  <h2 style="font-size:1rem; color:#666;">Tap tabs above to navigate your OS</h2>
+</div>
 <!-- ══════════════ DASHBOARD ══════════════ -->
 <div class="page active" id="page-dashboard">
   <div class="hero">
