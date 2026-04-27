@@ -137,4 +137,174 @@ function startBreak() {
   }, 1000);
 }
 
+// WATER REMINDER FUNCTIONALITY
+let waterReminderInterval = null;
+let waterReminderActive = false;
+let waterReminders = JSON.parse(localStorage.getItem('kk_water_reminders') || '[]');
+let waterStartTime = null;
+
+function saveWaterReminders() {
+  localStorage.setItem('kk_water_reminders', JSON.stringify(waterReminders));
+}
+
+function startWaterReminder() {
+  const interval = parseInt(document.getElementById('waterInterval').value);
+  
+  if (isNaN(interval) || interval < 5 || interval > 120) {
+    alert('Please enter a valid interval between 5 and 120 minutes');
+    return;
+  }
+
+  waterReminderActive = true;
+  waterStartTime = Date.now();
+  
+  // Request notification permission
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+
+  // Update UI
+  document.getElementById('startBtn').disabled = true;
+  document.getElementById('stopBtn').disabled = false;
+  document.getElementById('waterInterval').disabled = true;
+
+  // Clear any existing interval
+  if (waterReminderInterval) clearInterval(waterReminderInterval);
+
+  // Set the reminder loop
+  waterReminderInterval = setInterval(() => {
+    if (waterReminderActive) {
+      triggerWaterReminder();
+    }
+  }, interval * 60 * 1000); // Convert minutes to milliseconds
+
+  // Add initial log
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  waterReminders.unshift({
+    time: timeStr,
+    timestamp: now.getTime(),
+    type: 'started'
+  });
+  saveWaterReminders();
+  updateWaterHistory();
+  updateWaterCountdown(interval);
+}
+
+function stopWaterReminder() {
+  waterReminderActive = false;
+  if (waterReminderInterval) clearInterval(waterReminderInterval);
+  
+  // Update UI
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('stopBtn').disabled = true;
+  document.getElementById('waterInterval').disabled = false;
+  document.getElementById('waterCountdown').textContent = '--:--';
+  document.getElementById('waterStatus').textContent = 'Reminders disabled';
+
+  // Add log
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  waterReminders.unshift({
+    time: timeStr,
+    timestamp: now.getTime(),
+    type: 'stopped'
+  });
+  saveWaterReminders();
+  updateWaterHistory();
+}
+
+function triggerWaterReminder() {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+  
+  // Add to history
+  waterReminders.unshift({
+    time: timeStr,
+    timestamp: now.getTime(),
+    type: 'reminder'
+  });
+  saveWaterReminders();
+  updateWaterHistory();
+
+  // Show browser notification
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification('💧 Drink Water!', {
+      body: 'Time to hydrate! Drink a glass of water now.',
+      icon: '💧',
+      tag: 'water-reminder'
+    });
+  }
+
+  // Show in-app alert
+  showWaterAlert();
+}
+
+function showWaterAlert() {
+  // Simple alert or you can add a custom notification
+  const audio = new Audio('data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAA');
+  audio.play().catch(() => {}); // Try to play a beep sound
+  
+  alert('💧 Time to drink water! Stay hydrated!');
+}
+
+function updateWaterCountdown(interval) {
+  if (!waterReminderActive) return;
+  
+  const countdownInterval = setInterval(() => {
+    if (!waterReminderActive) {
+      clearInterval(countdownInterval);
+      return;
+    }
+    
+    const elapsed = Math.floor((Date.now() - waterStartTime) / 1000);
+    const totalSeconds = interval * 60;
+    const remaining = Math.max(0, totalSeconds - elapsed);
+    
+    const minutes = Math.floor(remaining / 60);
+    const seconds = remaining % 60;
+    
+    const timeStr = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+    const countdownEl = document.getElementById('waterCountdown');
+    if (countdownEl) countdownEl.textContent = timeStr;
+    
+    const statusEl = document.getElementById('waterStatus');
+    if (statusEl) statusEl.textContent = 'Reminders active every ' + interval + ' min';
+    
+    if (remaining <= 0) {
+      clearInterval(countdownInterval);
+      waterStartTime = Date.now(); // Reset for next interval
+      updateWaterCountdown(interval);
+    }
+  }, 1000);
+}
+
+function updateWaterHistory() {
+  const historyEl = document.getElementById('waterHistory');
+  if (!historyEl) return;
+  
+  if (waterReminders.length === 0) {
+    historyEl.innerHTML = '<div style="font-size:.82rem;color:var(--muted);text-align:center;padding:20px;">No reminders yet</div>';
+    return;
+  }
+
+  let html = '';
+  waterReminders.slice(0, 20).forEach(reminder => {
+    const icon = reminder.type === 'reminder' ? '💧' : reminder.type === 'started' ? '▶️' : '⏹️';
+    const label = reminder.type === 'reminder' ? 'Reminder' : reminder.type === 'started' ? 'Started' : 'Stopped';
+    html += `<div class="water-history-item">${icon} ${label}<br><span class="water-history-time">${reminder.time}</span></div>`;
+  });
+  
+  historyEl.innerHTML = html;
+}
+
+// Initialize water reminder on page load
+function initWaterReminder() {
+  updateWaterHistory();
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  if (startBtn) startBtn.disabled = false;
+  if (stopBtn) stopBtn.disabled = true;
+}
+
 // ===== BREAK SYSTEM END =====
