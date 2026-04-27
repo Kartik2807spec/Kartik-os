@@ -137,46 +137,66 @@ function startBreak() {
   }, 1000);
 }
 
-// WATER REMINDER FUNCTIONALITY
-let waterReminderInterval = null;
+// WATER REMINDER FUNCTIONALITY - FIXED SCHEDULE
+const WATER_REMINDER_TIMES = [
+  { hour: 6, minute: 0 },   // 6 AM
+  { hour: 8, minute: 0 },   // 8 AM
+  { hour: 11, minute: 0 },  // 11 AM
+  { hour: 15, minute: 0 },  // 3 PM
+  { hour: 18, minute: 0 },  // 6 PM
+  { hour: 19, minute: 30 }, // 7:30 PM
+  { hour: 22, minute: 30 }  // 10:30 PM
+];
+
+let waterReminderCheckInterval = null;
 let waterReminderActive = false;
 let waterReminders = JSON.parse(localStorage.getItem('kk_water_reminders') || '[]');
-let waterStartTime = null;
+let lastReminderTime = null;
 
 function saveWaterReminders() {
   localStorage.setItem('kk_water_reminders', JSON.stringify(waterReminders));
 }
 
-function startWaterReminder() {
-  const interval = parseInt(document.getElementById('waterInterval').value);
+function getNextReminderTime() {
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  const currentSeconds = now.getSeconds();
   
-  if (isNaN(interval) || interval < 5 || interval > 120) {
-    alert('Please enter a valid interval between 5 and 120 minutes');
-    return;
+  for (let i = 0; i < WATER_REMINDER_TIMES.length; i++) {
+    const reminder = WATER_REMINDER_TIMES[i];
+    const reminderMinutes = reminder.hour * 60 + reminder.minute;
+    const currentMinutes = currentHour * 60 + currentMinute;
+    
+    if (reminderMinutes > currentMinutes || (reminderMinutes === currentMinutes && currentSeconds < 5)) {
+      const nextTime = new Date();
+      nextTime.setHours(reminder.hour, reminder.minute, 0, 0);
+      return nextTime;
+    }
   }
-
-  waterReminderActive = true;
-  waterStartTime = Date.now();
   
+  // If no reminder today, next is 6 AM tomorrow
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(6, 0, 0, 0);
+  return tomorrow;
+}
+
+function startWaterReminder() {
   // Request notification permission
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission();
   }
 
+  waterReminderActive = true;
+  lastReminderTime = null;
+  
   // Update UI
   document.getElementById('startBtn').disabled = true;
   document.getElementById('stopBtn').disabled = false;
-  document.getElementById('waterInterval').disabled = true;
 
   // Clear any existing interval
-  if (waterReminderInterval) clearInterval(waterReminderInterval);
-
-  // Set the reminder loop
-  waterReminderInterval = setInterval(() => {
-    if (waterReminderActive) {
-      triggerWaterReminder();
-    }
-  }, interval * 60 * 1000); // Convert minutes to milliseconds
+  if (waterReminderCheckInterval) clearInterval(waterReminderCheckInterval);
 
   // Add initial log
   const now = new Date();
@@ -188,17 +208,26 @@ function startWaterReminder() {
   });
   saveWaterReminders();
   updateWaterHistory();
-  updateWaterCountdown(interval);
+
+  // Check every minute for scheduled reminders
+  waterReminderCheckInterval = setInterval(() => {
+    if (waterReminderActive) {
+      checkAndTriggerReminder();
+    }
+  }, 60 * 1000); // Check every minute
+
+  // Also check immediately
+  checkAndTriggerReminder();
+  updateWaterCountdown();
 }
 
 function stopWaterReminder() {
   waterReminderActive = false;
-  if (waterReminderInterval) clearInterval(waterReminderInterval);
+  if (waterReminderCheckInterval) clearInterval(waterReminderCheckInterval);
   
   // Update UI
   document.getElementById('startBtn').disabled = false;
   document.getElementById('stopBtn').disabled = true;
-  document.getElementById('waterInterval').disabled = false;
   document.getElementById('waterCountdown').textContent = '--:--';
   document.getElementById('waterStatus').textContent = 'Reminders disabled';
 
@@ -214,7 +243,37 @@ function stopWaterReminder() {
   updateWaterHistory();
 }
 
-function triggerWaterReminder() {
+function checkAndTriggerReminder() {
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes();
+  
+  // Check if current time matches any scheduled reminder time
+  for (let i = 0; i < WATER_REMINDER_TIMES.length; i++) {
+    const reminder = WATER_REMINDER_TIMES[i];
+    
+    if (currentHour === reminder.hour && currentMinute === reminder.minute) {
+      // Create unique key for this reminder time
+      const reminderKey = `${currentHour}:${currentMinute}:${now.getDate()}`;
+      
+      // Only trigger once per scheduled time per day
+      if (lastReminderTime !== reminderKey) {
+        lastReminderTime = reminderKey;
+        triggerWaterReminder(reminder);
+      }
+      break;
+    }
+  }
+  
+  // Reset lastReminderTime when we pass all reminders (at 11 PM or later)
+  if (currentHour >= 23 || (currentHour === 0 && currentMinute < 10)) {
+    if (lastReminderTime && !lastReminderTime.includes(now.getDate())) {
+      lastReminderTime = null;
+    }
+  }
+}
+
+function triggerWaterReminder(reminderTime) {
   const now = new Date();
   const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
   
@@ -241,14 +300,14 @@ function triggerWaterReminder() {
 }
 
 function showWaterAlert() {
-  // Simple alert or you can add a custom notification
+  // Try to play a beep sound
   const audio = new Audio('data:audio/wav;base64,UklGRiYAAABXQVZFZm10IBAAAAABAAEAQB8AAAB9AAACABAAZGF0YQIAAAAA');
-  audio.play().catch(() => {}); // Try to play a beep sound
+  audio.play().catch(() => {}); 
   
   alert('💧 Time to drink water! Stay hydrated!');
 }
 
-function updateWaterCountdown(interval) {
+function updateWaterCountdown() {
   if (!waterReminderActive) return;
   
   const countdownInterval = setInterval(() => {
@@ -257,25 +316,28 @@ function updateWaterCountdown(interval) {
       return;
     }
     
-    const elapsed = Math.floor((Date.now() - waterStartTime) / 1000);
-    const totalSeconds = interval * 60;
-    const remaining = Math.max(0, totalSeconds - elapsed);
+    const nextReminder = getNextReminderTime();
+    const now = new Date();
+    const diff = nextReminder - now;
     
-    const minutes = Math.floor(remaining / 60);
-    const seconds = remaining % 60;
+    if (diff <= 0) {
+      clearInterval(countdownInterval);
+      updateWaterCountdown();
+      return;
+    }
     
-    const timeStr = String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+    const totalSeconds = Math.floor(diff / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    
+    const timeStr = String(hours).padStart(2, '0') + ':' + String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
     const countdownEl = document.getElementById('waterCountdown');
     if (countdownEl) countdownEl.textContent = timeStr;
     
+    const nextReminderStr = nextReminder.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     const statusEl = document.getElementById('waterStatus');
-    if (statusEl) statusEl.textContent = 'Reminders active every ' + interval + ' min';
-    
-    if (remaining <= 0) {
-      clearInterval(countdownInterval);
-      waterStartTime = Date.now(); // Reset for next interval
-      updateWaterCountdown(interval);
-    }
+    if (statusEl) statusEl.textContent = 'Next reminder at ' + nextReminderStr;
   }, 1000);
 }
 

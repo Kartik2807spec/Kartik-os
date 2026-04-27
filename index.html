@@ -209,6 +209,7 @@ select:focus,input:focus{outline:none;border-color:var(--gold);}
 .water-status-label{font-family:'DM Mono',monospace;font-size:.7rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;}
 .water-status-time{font-family:'Bebas Neue',sans-serif;font-size:3rem;color:var(--blue);line-height:1;margin-bottom:4px;}
 .water-status-sub{font-size:.82rem;color:var(--blue);font-weight:500;}
+.water-time-badge{background:rgba(76,140,224,.12);border:1px solid rgba(76,140,224,.25);border-radius:8px;padding:10px;text-align:center;font-weight:600;color:var(--blue);font-size:.85rem;}
 .water-history-item{background:var(--s2);border-left:3px solid var(--blue);padding:10px 12px;margin-bottom:8px;border-radius:4px;font-size:.8rem;}
 .water-history-time{color:var(--muted);font-family:'DM Mono',monospace;font-size:.7rem;}
 </style>
@@ -630,16 +631,19 @@ select:focus,input:focus{outline:none;border-color:var(--gold);}
 
     <!-- Settings Card -->
     <div class="app-card" style="margin-top:14px;">
-      <div class="block-label" style="margin-bottom:14px;">Reminder Settings</div>
-      <div style="display:grid;gap:12px;">
-        <div>
-          <label style="font-size:.82rem;color:var(--muted);display:block;margin-bottom:6px;">Interval (minutes)</label>
-          <input type="number" id="waterInterval" min="5" max="120" value="30" style="width:100%;padding:10px;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.85rem;">
-        </div>
-        <div style="display:flex;gap:8px;">
-          <button class="btn" onclick="startWaterReminder()" id="startBtn" style="flex:1;">Start Reminders</button>
-          <button class="btn btn-ghost" onclick="stopWaterReminder()" id="stopBtn" style="flex:1;">Stop</button>
-        </div>
+      <div class="block-label" style="margin-bottom:14px;">Scheduled Times</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
+        <div class="water-time-badge">6:00 AM</div>
+        <div class="water-time-badge">8:00 AM</div>
+        <div class="water-time-badge">11:00 AM</div>
+        <div class="water-time-badge">3:00 PM</div>
+        <div class="water-time-badge">6:00 PM</div>
+        <div class="water-time-badge">7:30 PM</div>
+        <div class="water-time-badge">10:30 PM</div>
+      </div>
+      <div style="display:flex;gap:8px;">
+        <button class="btn" onclick="startWaterReminder()" id="startBtn" style="flex:1;">Start Reminders</button>
+        <button class="btn btn-ghost" onclick="stopWaterReminder()" id="stopBtn" style="flex:1;">Stop</button>
       </div>
     </div>
 
@@ -654,7 +658,7 @@ select:focus,input:focus{outline:none;border-color:var(--gold);}
     <!-- Info Box -->
     <div style="background:rgba(76,175,125,.06);border:1px solid rgba(76,175,125,.15);border-radius:10px;padding:14px;margin-top:14px;font-size:.82rem;color:var(--text);line-height:1.6;">
       <div style="color:var(--green);font-weight:600;margin-bottom:6px;">💡 Tip</div>
-      <div>Drink at least 8 glasses of water daily (about 2-3 liters). Set reminders every 30-60 minutes when you're working. Remember: thirst is not always a reliable indicator of dehydration.</div>
+      <div>Get reminders at 7 fixed times throughout your day to ensure consistent hydration. Drink at least 8 glasses of water daily (about 2-3 liters). Browser notifications must be enabled for this to work.</div>
     </div>
 
   </div>
