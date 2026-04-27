@@ -371,18 +371,18 @@ function initWaterReminder() {
 
 // MOTIVATION VIDEOS - SADHGURU CHANNEL
 const SADHGURU_VIDEOS = [
-  { id: 'Z9L-l_gVh5c', title: 'Be Happy for No Reason' },
-  { id: '8DfN-6g7IXs', title: 'The Power of Your Breath' },
-  { id: 'I_eYxJ1D82U', title: 'Why Do We Suffer?' },
-  { id: 'zaMEr5NQECY', title: 'The Secret to Inner Peace' },
-  { id: 'uPVSyidCZ3A', title: 'How to Live a Stress-Free Life' },
-  { id: '6tAQUjEHbX0', title: 'Meditation for Beginners' },
-  { id: 'B0u5h0gSEOo', title: 'The Essence of Success' },
-  { id: 'mQGvhXNKfbs', title: 'Transform Your Life' },
-  { id: 'L8iBe0gzrDE', title: 'Finding Your Purpose' },
-  { id: 'V0qjQKwt17o', title: 'The Science of Yoga' },
-  { id: 'c_yKw3nWvB4', title: 'What is Life?' },
-  { id: 'FOiZWYFU8-8', title: 'The Art of Living' },
+  { id: 'lHXKSGJjGQU', title: 'How to Be Happy for No Reason' },
+  { id: 'wbJHVkrqvBE', title: 'The Power of Your Breath' },
+  { id: 'JKfvWFQ7Q4w', title: 'Why Suffering Exists' },
+  { id: '1vHDfMd_Lec', title: 'Inner Engineering' },
+  { id: 'BXHvhJA0YJg', title: 'Stress-Free Living' },
+  { id: 'cA0Z6HrEQ5o', title: 'Meditation 101' },
+  { id: 'Zp8j1fXB15E', title: 'The Nature of Mind' },
+  { id: 'z9OKsHsVILk', title: 'Path to Freedom' },
+  { id: '8yh-nEpSTWI', title: 'Finding Your Purpose' },
+  { id: 'oOgwMNEqNWs', title: 'Yoga & Science' },
+  { id: 'TovwAM0rQQs', title: 'Questions on Life' },
+  { id: 'V-fXHjLFZwQ', title: 'The Art of Living' },
 ];
 
 let currentMotivationIndex = null;
