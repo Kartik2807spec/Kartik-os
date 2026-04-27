@@ -377,22 +377,11 @@ select:focus,input:focus{outline:none;border-color:var(--gold);}
   <div id="bfWeek" class="padded">
     <div id="tomorrowReminder" style="margin-bottom:12px;"></div>
     <div class="alert alert-info"><span>💡</span><span>All meals are <strong>zero added sugar</strong>. Natural sugars from banana & fruits are fine. No honey in oats — use cinnamon instead.</span></div>
-    <div style="margin-bottom:14px;"><button class="btn" onclick="showRandomBreakfast()">🎲 Get Random Quick Indian Breakfast Video</button></div>
-    <div style="margin-bottom:14px;">
-      <input id="channelNamesInput" type="text" placeholder="Enter channel names, comma separated (e.g. Icooklean, Ladleandlovebyridhima)" style="width:100%; padding:10px; border:1px solid var(--border); border-radius:10px; background:var(--s2); color:var(--text); margin-bottom:8px;">
-      <button class="btn btn-sm" onclick="showRandomChannelVideo()">🎬 Pick Random Top Channel Video</button>
-    </div>
+    <div style="margin-bottom:14px;"><button class="btn" onclick="showRandomBreakfast()">🎲 Get Random Quick Indian Breakfast Recipe</button></div>
     <div id="randomBreakfast" style="display:none; margin-bottom:14px; background:var(--s1); border:1px solid var(--border); border-radius:12px; padding:16px;">
       <div style="font-size:.88rem; font-weight:600; margin-bottom:8px;" id="rbName"></div>
       <div style="font-size:.7rem; color:var(--muted); margin-bottom:8px;"><strong>Time:</strong> <span id="rbTime"></span> | <strong>Ingredients:</strong> <span id="rbIngredients"></span></div>
       <div style="font-size:.78rem; margin-bottom:12px;" id="rbPrep"></div>
-      <iframe id="rbVideo" width="100%" height="200" src="" frameborder="0" allowfullscreen style="border-radius:8px;"></iframe>
-    </div>
-    <div id="randomChannelVideo" style="display:none; background:var(--s1); border:1px solid var(--border); border-radius:12px; padding:16px;">
-      <div style="font-size:.88rem; font-weight:600; margin-bottom:8px;" id="rcvName"></div>
-      <div style="font-size:.7rem; color:var(--muted); margin-bottom:12px;" id="rcvChannel"></div>
-      <iframe id="rcvVideo" width="100%" height="200" src="" frameborder="0" allowfullscreen style="border-radius:8px;"></iframe>
-      <div style="margin-top:10px; font-size:.78rem; color:var(--muted);" id="rcvNotice"></div>
     </div>
     <div class="meal-card">
       <div class="meal-day">Monday · Day 1</div>
