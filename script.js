@@ -369,4 +369,116 @@ function initWaterReminder() {
   if (stopBtn) stopBtn.disabled = true;
 }
 
+// MOTIVATION VIDEOS - SADHGURU CHANNEL
+const SADHGURU_VIDEOS = [
+  { id: 'Z9L-l_gVh5c', title: 'Be Happy for No Reason' },
+  { id: '8DfN-6g7IXs', title: 'The Power of Your Breath' },
+  { id: 'I_eYxJ1D82U', title: 'Why Do We Suffer?' },
+  { id: 'zaMEr5NQECY', title: 'The Secret to Inner Peace' },
+  { id: 'uPVSyidCZ3A', title: 'How to Live a Stress-Free Life' },
+  { id: '6tAQUjEHbX0', title: 'Meditation for Beginners' },
+  { id: 'B0u5h0gSEOo', title: 'The Essence of Success' },
+  { id: 'mQGvhXNKfbs', title: 'Transform Your Life' },
+  { id: 'L8iBe0gzrDE', title: 'Finding Your Purpose' },
+  { id: 'V0qjQKwt17o', title: 'The Science of Yoga' },
+  { id: 'c_yKw3nWvB4', title: 'What is Life?' },
+  { id: 'FOiZWYFU8-8', title: 'The Art of Living' },
+];
+
+let currentMotivationIndex = null;
+
+function getDayOfYear() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  const diff = now - start;
+  const oneDay = 1000 * 60 * 60 * 24;
+  return Math.floor(diff / oneDay);
+}
+
+function getTodaysMotivationIndex() {
+  const dayOfYear = getDayOfYear();
+  return dayOfYear % SADHGURU_VIDEOS.length;
+}
+
+function loadMotivationVideo(index) {
+  if (index < 0) {
+    index = SADHGURU_VIDEOS.length - 1;
+  } else if (index >= SADHGURU_VIDEOS.length) {
+    index = 0;
+  }
+  
+  currentMotivationIndex = index;
+  const video = SADHGURU_VIDEOS[index];
+  
+  // Update iframe
+  const iframe = document.getElementById('motivationVideo');
+  if (iframe) {
+    iframe.src = `https://www.youtube.com/embed/${video.id}?autoplay=0`;
+  }
+  
+  // Update title
+  const titleEl = document.getElementById('videoTitle');
+  if (titleEl) {
+    titleEl.textContent = video.title;
+  }
+  
+  // Update date
+  const dateEl = document.getElementById('videoDate');
+  if (dateEl) {
+    const isToday = index === getTodaysMotivationIndex();
+    dateEl.textContent = isToday ? 'Today' : `Video ${index + 1} of ${SADHGURU_VIDEOS.length}`;
+  }
+  
+  // Update list highlighting
+  updateMotivationVideoList(index);
+}
+
+function updateMotivationVideoList(activeIndex) {
+  const listEl = document.getElementById('videoList');
+  if (!listEl) return;
+  
+  let html = '';
+  const todayIndex = getTodaysMotivationIndex();
+  
+  SADHGURU_VIDEOS.forEach((video, idx) => {
+    const isToday = idx === todayIndex;
+    const isActive = idx === activeIndex;
+    const icon = isToday ? '⭐' : '▶️';
+    
+    html += `<div class="video-list-item ${isActive ? 'active' : ''}" onclick="loadMotivationVideo(${idx})">
+      <div class="video-list-icon">${icon}</div>
+      <div class="video-list-info">
+        <div class="video-list-title">${video.title}</div>
+        <div class="video-list-day">${isToday ? '📅 Today' : `Video ${idx + 1}`}</div>
+      </div>
+    </div>`;
+  });
+  
+  listEl.innerHTML = html;
+}
+
+function refreshMotivationVideo() {
+  const todayIndex = getTodaysMotivationIndex();
+  loadMotivationVideo(todayIndex);
+  window.scrollTo(0, 0);
+}
+
+function previousMotivationVideo() {
+  if (currentMotivationIndex === null) {
+    currentMotivationIndex = getTodaysMotivationIndex();
+  }
+  loadMotivationVideo(currentMotivationIndex - 1);
+}
+
+function nextMotivationVideo() {
+  if (currentMotivationIndex === null) {
+    currentMotivationIndex = getTodaysMotivationIndex();
+  }
+  loadMotivationVideo(currentMotivationIndex + 1);
+}
+
+function initMotivationVideos() {
+  refreshMotivationVideo();
+}
+
 // ===== BREAK SYSTEM END =====

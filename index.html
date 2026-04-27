@@ -212,6 +212,18 @@ select:focus,input:focus{outline:none;border-color:var(--gold);}
 .water-time-badge{background:rgba(76,140,224,.12);border:1px solid rgba(76,140,224,.25);border-radius:8px;padding:10px;text-align:center;font-weight:600;color:var(--blue);font-size:.85rem;}
 .water-history-item{background:var(--s2);border-left:3px solid var(--blue);padding:10px 12px;margin-bottom:8px;border-radius:4px;font-size:.8rem;}
 .water-history-time{color:var(--muted);font-family:'DM Mono',monospace;font-size:.7rem;}
+
+/* MOTIVATION VIDEOS STYLES */
+.video-container{width:100%;margin-bottom:14px;}
+.video-wrapper{position:relative;width:100%;padding-bottom:56.25%;height:0;overflow:hidden;border-radius:12px;background:var(--s2);}
+.video-wrapper iframe{position:absolute;top:0;left:0;width:100%;height:100%;}
+.video-list-item{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer;transition:all .2s;display:flex;gap:8px;align-items:center;}
+.video-list-item:hover{border-color:var(--purple);background:rgba(156,108,224,.08);}
+.video-list-item.active{border-color:var(--purple);background:rgba(156,108,224,.12);}
+.video-list-icon{font-size:1.2rem;flex-shrink:0;}
+.video-list-info{flex:1;}
+.video-list-title{font-size:.82rem;font-weight:500;color:var(--text);}
+.video-list-day{font-size:.7rem;color:var(--muted);font-family:'DM Mono',monospace;}
 </style>
 </head>
 <body>
@@ -235,6 +247,7 @@ select:focus,input:focus{outline:none;border-color:var(--gold);}
     <button class="ntab" onclick="goPage('workout',this)"><span class="ntab-icon">💪</span>Workout</button>
     <button class="ntab" onclick="goPage('skincare',this)"><span class="ntab-icon">✨</span>Skin</button>
     <button class="ntab" onclick="goPage('water',this)"><span class="ntab-icon">💧</span>Water</button>
+    <button class="ntab" onclick="goPage('motivation',this)"><span class="ntab-icon">🎬</span>Motivation</button>
   </div>
 </nav>
 
@@ -664,6 +677,49 @@ select:focus,input:focus{outline:none;border-color:var(--gold);}
   </div>
 </div>
 
+<!-- MOTIVATION -->
+<div class="page" id="page-motivation">
+  <div class="sec-hd"><h2>🎬 Daily Motivation</h2><p>Sadhguru · One inspiring video per day</p></div>
+  <div class="padded">
+    
+    <!-- Video Player -->
+    <div class="video-container">
+      <div class="video-wrapper" id="videoWrapper">
+        <iframe id="motivationVideo" width="100%" height="400" src="" title="Sadhguru motivation" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen style="border-radius:12px;"></iframe>
+      </div>
+    </div>
+
+    <!-- Video Info -->
+    <div class="app-card" style="margin-top:14px;">
+      <div class="block-label" style="margin-bottom:8px;">Today's Video</div>
+      <div id="videoTitle" style="font-size:.95rem;font-weight:600;margin-bottom:6px;color:var(--text);">Loading...</div>
+      <div id="videoDate" style="font-size:.75rem;color:var(--muted);font-family:'DM Mono',monospace;letter-spacing:.05em;">Today</div>
+    </div>
+
+    <!-- Navigation -->
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn btn-ghost" onclick="previousMotivationVideo()" style="flex:1;">← Previous</button>
+      <button class="btn" onclick="refreshMotivationVideo()" style="flex:1;">🔄 Today's</button>
+      <button class="btn btn-ghost" onclick="nextMotivationVideo()" style="flex:1;">Next →</button>
+    </div>
+
+    <!-- Video List -->
+    <div class="app-card" style="margin-top:14px;">
+      <div class="block-label" style="margin-bottom:12px;">All Videos</div>
+      <div id="videoList" style="max-height:400px;overflow-y:auto;">
+        <div style="font-size:.82rem;color:var(--muted);text-align:center;padding:20px;">Loading videos...</div>
+      </div>
+    </div>
+
+    <!-- Info Box -->
+    <div style="background:rgba(156,108,224,.06);border:1px solid rgba(156,108,224,.15);border-radius:10px;padding:14px;margin-top:14px;font-size:.82rem;color:var(--text);line-height:1.6;">
+      <div style="color:var(--purple);font-weight:600;margin-bottom:6px;">💡 Tip</div>
+      <div>Start your day with Sadhguru's wisdom. Each day brings a different perspective. Take 10 minutes to watch, reflect, and apply the insights to your life.</div>
+    </div>
+
+  </div>
+</div>
+
 </main>
 
 <script>
@@ -928,6 +984,7 @@ renderAll();
 initNotifications();
 checkTimedBanners();
 initWaterReminder();
+initMotivationVideos();
 
 setInterval(checkTimedBanners, 5 * 60 * 1000);
 setInterval(renderReminders, 60 * 1000);
